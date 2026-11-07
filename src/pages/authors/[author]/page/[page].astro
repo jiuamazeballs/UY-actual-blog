@@ -4,6 +4,7 @@ import Layout from '@layouts/Layout.astro';
 import PostCard from '@components/blog/PostCard.astro';
 import Pagination from '@components/common/Pagination.astro';
 import { getPagination } from '@utils/pagination';
+import { getAuthorDisplayName } from '@utils/authors';
 import { siteConfig } from '@config/site';
 
 export async function getStaticPaths({ paginate }) {
@@ -64,10 +65,9 @@ const paginatedPosts = posts.slice(startIndex, endIndex);
 // Set noindex based on site config
 const noindex = siteConfig.noindex.authors;
 
-// Format the author name for display
-const formattedAuthor = author.split(' ').map(word => 
-  word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-).join(' ');
+// Prefer the author's real display name from their authors collection entry;
+// falls back to a capitalized version of the slug if they have no entry.
+const formattedAuthor = await getAuthorDisplayName(author);
 ---
 
 <Layout 

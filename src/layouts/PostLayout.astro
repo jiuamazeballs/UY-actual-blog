@@ -9,9 +9,13 @@ import SocialShare from '@layouts/components/blog/SocialShare.astro';
 import SeriesNav from '@layouts/components/widgets/SeriesNav.astro';
 import ReadingProgress from '@layouts/components/blog/ReadingProgress.astro';
 import Breadcrumb from '@layouts/components/common/Breadcrumb.astro';
+import { getAuthorDisplayName } from '@utils/authors';
 
 const { post, headings } = Astro.props;
 const { title, description, image, date, categories, authors, tags } = post.data;
+const authorDisplayEntries = authors && authors.length > 0
+  ? await Promise.all(authors.map(async (author: string) => ({ slug: author, name: await getAuthorDisplayName(author) })))
+  : [];
 
 // Get the canonical URL for this post
 // Make sure we have a valid site URL to avoid the TypeError: Invalid URL error
@@ -41,7 +45,7 @@ breadcrumbs.push({ name: title, url: canonicalURL });
   article={true}
   canonical={canonicalURL}
   publishDate={date}
-  author={authors && authors.length > 0 ? { name: authors[0] } : undefined}
+  author={authorDisplayEntries.length > 0 ? { name: authorDisplayEntries[0].name } : undefined}
   tags={tags}
   categories={categories}
   breadcrumbs={breadcrumbs}>
@@ -83,16 +87,16 @@ breadcrumbs.push({ name: title, url: canonicalURL });
         )}
         
         <!-- Author -->
-        {authors && authors.length > 0 && (
+        {authorDisplayEntries.length > 0 && (
           <div class="flex items-center">
             <Icon name="mdi:account" class="w-5 h-5 mr-1" />
             <div class="flex flex-wrap gap-2">
-              {authors.map((author: string) => (
-                <a 
-                  href={`/authors/${author.toLowerCase()}/`} 
+              {authorDisplayEntries.map(({ slug, name }) => (
+                <a
+                  href={`/authors/${slug.toLowerCase()}/`}
                   class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300"
                 >
-                  {author}
+                  {name}
                 </a>
               ))}
             </div>
